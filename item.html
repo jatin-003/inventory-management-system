@@ -1,0 +1,38 @@
+<div class="container-fluid">
+  <div class="card mt-3">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Item Management</h5>
+    </div>
+    <div class="card-body">
+      <form id="itemForm">
+        <div class="form-group">
+          <label for="itemId">Item ID <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="itemId" placeholder="Enter Item ID" maxlength="20" required>
+        </div>
+
+        <div class="form-group">
+          <label for="itemName">Item Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="itemName" placeholder="Enter Item Name" maxlength="100" required>
+        </div>
+
+        <div class="form-group">
+          <label for="openingStock">Opening Stock <span class="text-danger">*</span></label>
+          <input type="number" step="0.001" class="form-control" id="openingStock" placeholder="Enter Opening Stock" required>
+        </div>
+
+        <div class="form-group">
+          <label for="uom">Unit of Measurement <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="uom" placeholder="e.g., KG, LTR" maxlength="10" required>
+        </div>
+
+        <div class="form-group text-right">
+          <button type="button" class="btn btn-success mr-2" id="saveBtn" onclick="saveItem()">Save</button>
+          <button type="button" class="btn btn-primary mr-2" id="editBtn" onclick="editItem()">Edit</button>
+          <button type="button" class="btn btn-secondary" id="resetBtn" onclick="resetForm()">Reset</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="js/item-management.js"></script>

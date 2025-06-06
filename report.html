@@ -1,0 +1,44 @@
+<div class="container-fluid">
+    <div class="card mt-3">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Item Report</h5>
+        </div>
+        <div class="card-body">
+            <form id="reportFilterForm" class="form-inline mb-4">
+                <div class="form-group mr-3">
+                    <label for="reportItemIdFrom" class="mr-2">Item ID From:</label>
+                    <input type="text" class="form-control" id="reportItemIdFrom" placeholder="Start ID" maxlength="20">
+                    <small id="fromIdError" class="form-text text-danger" style="display: none;"></small>
+                </div>
+                <div class="form-group mr-3">
+                    <label for="reportItemIdTo" class="mr-2">Item ID To:</label>
+                    <input type="text" class="form-control" id="reportItemIdTo" placeholder="End ID" maxlength="20">
+                    <small id="toIdError" class="form-text text-danger" style="display: none;"></small>
+                </div>
+
+                <button type="button" class="btn btn-primary" onclick="generateItemReport()">Generate Report</button>
+            </form>
+
+            <div id="reportTableContainer" class="table-responsive">
+                <table class="table table-bordered table-striped data-table">
+                    <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Item Name</th>
+                            <th>Current Stock</th>
+                            <th>Unit of Measure</th>
+                            <th>Opening Stock</th>
+                            <th>Items Received</th>
+                            <th>Items Issued</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemReportTableBody">
+                        </tbody>
+                </table>
+            </div>
+            <p id="noReportData" class="text-center mt-3 text-muted" style="display: none;">No items found for the selected range.</p>
+        </div>
+    </div>
+</div>
+
+<script src="js/item-report.js"></script>

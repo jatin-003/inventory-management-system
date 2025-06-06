@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inventory Dashboard</title>
+
+    <!-- AdminLTE & Dependencies -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="#" class="nav-link">Raw Material Inventory System</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <a href="#" class="brand-link">
+            <span class="brand-text font-weight-light">Inventory System</span>
+        </a>
+        <div class="sidebar">
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="loadPage('item.html')">
+                            <i class="fas fa-box"></i>
+                            <p>Item Management</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="loadPage('inward.html')">
+                            <i class="fas fa-arrow-down"></i>
+                            <p>Item Inward</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="loadPage('outward.html')">
+                            <i class="fas fa-arrow-up"></i>
+                            <p>Item Outward</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="loadPage('report.html')">
+                            <i class="fas fa-table"></i>
+                            <p>Item Report</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <section class="content pt-3" id="main-content">
+            <!-- Pages will be loaded here dynamically -->
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer text-center">
+        <strong>&copy; 2025 Inventory System</strong>
+    </footer>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+<script src="https://login2explore.com/jpdb/resources/js/0.0.4/jpdb-commons.js"></script>
+
+<script>
+    function loadPage(page) {
+        $("#main-content").empty(); 
+        $("#main-content").load(page, function(response, status, xhr) {
+            if (status == "error") {
+                console.error("Error loading page:", xhr.status, xhr.statusText);
+            }
+        });
+    }
+
+    const JPDB_BASE_URL = "http://api.login2explore.com:5577";
+    const DB_NAME = "InventoryDB";
+    const TOKEN = "90934274|-31949212009479388|90956757"; 
+    const ITEMS_REL = "ITEMS";
+    const INWARD_REL = "INWARD";
+    const OUTWARD_REL = "OUTWARD";
+
+function updateItemStock(id, qty, type) {
+    const getReq = createGET_BY_KEYRequest(TOKEN, DB_NAME, ITEMS_REL, JSON.stringify({ ItemID: id }));
+
+    jQuery.ajaxSetup({ async: false });
+    const getResult = executeCommandAtGivenBaseUrl(getReq, JPDB_BASE_URL, "/api/irl");
+    jQuery.ajaxSetup({ async: true });
+
+    if (getResult.status === 200) {
+        const data = JSON.parse(getResult.data);
+        const existingRecord = data.record;
+
+        const openingStock = parseFloat(existingRecord.OpeningStock || 0);
+        const itemsReceived = parseFloat(existingRecord.ItemsReceived || 0);
+        const itemsIssued = parseFloat(existingRecord.ItemsIssued || 0);
+        const availableStock = parseFloat(existingRecord.AvailableStock || 0); 
+
+        let recordForUpdate = {
+            ItemID: id,
+            ItemName: existingRecord.ItemName,
+            OpeningStock: openingStock,
+            ItemsReceived: itemsReceived,
+            ItemsIssued: itemsIssued,
+            AvailableStock: availableStock, 
+            UoM: existingRecord.UoM 
+        };
+
+        if (type === 'received') {
+            recordForUpdate.ItemsReceived += qty;
+        } else if (type === 'issued') {
+            recordForUpdate.ItemsIssued += qty;
+        }
+
+        recordForUpdate.AvailableStock = recordForUpdate.OpeningStock + recordForUpdate.ItemsReceived - recordForUpdate.ItemsIssued;
+
+        const updateReq = createUPDATERecordRequest(TOKEN, JSON.stringify(recordForUpdate), DB_NAME, ITEMS_REL, data.rec_no);
+
+        jQuery.ajaxSetup({ async: false });
+        const updateResult = executeCommandAtGivenBaseUrl(updateReq, JPDB_BASE_URL, "/api/iml");
+        jQuery.ajaxSetup({ async: true });
+
+        if (updateResult.status === 200) {
+            return true;
+        } else {
+            console.error("Error updating stock record:", updateResult.message || JSON.stringify(updateResult));
+            return false;
+        }
+    } else {
+        console.error("Item not found for stock update (GET failed):", getResult.message || JSON.stringify(getResult));
+        return false;
+    }
+}
+</script>
+
+</body>
+</html>
